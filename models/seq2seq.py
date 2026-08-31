@@ -229,7 +229,6 @@ class seq2seq(nn.Module):
             if temp.item() == EOS_IDX :
                 break
             result.append(temp.item())
-
         return result
 
 PAD_IDX, SOS_IDX, EOS_IDX, UNK_IDX = 0, 1, 2, 3
@@ -343,12 +342,29 @@ if __name__ == '__main__':
     model = seq2seq(encoder, decoder, len(fr_vocab)).to(device)
 
     #4.train 시작
-    history = train_model(model, 
-                          train_loader, 
-                          valid_loader,
-                          0.01,
-                          100,
-                          device=device)
+    # history = train_model(model, 
+    #                       train_loader, 
+    #                       valid_loader,
+    #                       0.01,
+    #                       100,
+    #                       device=device)
 
     #5.실제 번역(추론)
     #model.translate()
+    test_sentence = [
+        "i love pizza .",
+        "she is reading a book .",
+        "we are happy today .",
+        "the cat is on the table .",
+        "he does not speak french .",
+    ]
+
+    model.eval()
+    for sentence in test_sentence:
+        #각각 토큰화 -> 인코딩(숫자변경) -> 예측
+        tokens = normalize(sentence, 'en')
+        src = torch.tensor(en_vocab.encode(tokens=tokens), 
+                           dtype=torch.long).unsqueeze(0).to(device)
+        pred = fr_vocab.decode(model.translate(src, max_len=30))
+        print(f'원본 : {sentence} -> 예측 : {" ".join(pred)}')
+    
