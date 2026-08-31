@@ -179,10 +179,10 @@ class Decoder(nn.Module):
     #cell   ->(from encoder)
     def forward(self, token, hidden, cell):
         #Token => (B) -> 언스퀴즈 (B, 1) -> 임베딩 거친 후 (B, 1, E)
-        embed = self.embedding(token.unsqueeze(1))
+        embed = self.dropout(self.embedding(token.unsqueeze(1)))
         #(hidden, cell) 은 인코더의 출력물, 전체 데이터에 대한 정보 기억
         #(hidden, cell)은 과거의 기억(hidden state) -> 앞으로 나올 단어 산출
-        out, (hidden, cell) = self.lstm(self.dropout(embed), (hidden, cell))
+        out, (hidden, cell) = self.ltsm(embed, (hidden, cell))
         word = self.fc(out.squeeze(1))
         return word, hidden, cell
 
@@ -347,7 +347,7 @@ if __name__ == '__main__':
                           train_loader, 
                           valid_loader,
                           0.01,
-                          1,
+                          100,
                           device=device)
 
     #5.실제 번역(추론)
